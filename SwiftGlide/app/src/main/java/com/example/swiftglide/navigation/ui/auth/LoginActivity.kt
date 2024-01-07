@@ -142,13 +142,21 @@ fun SwitchToSignupText(navController: NavController) {
         )
     }
 }
-fun addUserInDB(
+
+/**
+ * Adds the user to the database and navigates back.
+ *
+ * @param navController The navigation controller.
+ * @param user The user to be added.
+ * @param homeViewModel The HomeViewModel.
+ */
+
+private fun addUserInDB(
     navController: NavController,
     user: User,
     homeViewModel: HomeViewModel
 ) {
     homeViewModel.addUser(user)
-    navController.popBackStack()
 }
 
 @Composable
@@ -161,6 +169,16 @@ fun Logo() {
             .height(219.dp)
     )
 }
+
+
+
+/**
+ * Composable function for the vertical layout of the login screen.
+ *
+ * @param navController The navigation controller.
+ * @param authViewModel The AuthViewModel.
+ * @param homeViewModel The HomeViewModel.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LoginScreenVertical(navController: NavController, authViewModel : AuthViewModel, homeViewModel: HomeViewModel) {
@@ -369,6 +387,7 @@ fun LoginScreenVertical(navController: NavController, authViewModel : AuthViewMo
                                 val user = User(email, loginResponse.role)
 
                                 addUserInDB(navController, user, homeViewModel)
+                                delay(1000)
                                 Log.d("database", "LoginScreen: added user to db")
                                 navController.navigate(Screen.HomeScreen.route)
                             } else {
@@ -413,7 +432,13 @@ fun LoginScreenVertical(navController: NavController, authViewModel : AuthViewMo
 
 }
 
-
+/**
+ * Composable function for the landscape layout of the login screen.
+ *
+ * @param navController The navigation controller.
+ * @param authViewModel The AuthViewModel.
+ * @param homeViewModel The HomeViewModel.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LoginScreenLandscape(navController: NavController, authViewModel : AuthViewModel, homeViewModel: HomeViewModel) {
@@ -656,6 +681,7 @@ fun LoginScreenLandscape(navController: NavController, authViewModel : AuthViewM
                                                 val user = User(email, loginResponse.role)
 
                                                 addUserInDB(navController, user, homeViewModel)
+                                                delay(1000)
                                                 Log.d("database", "LoginScreen: added user to db")
                                                 navController.navigate(Screen.HomeScreen.route)
                                             } else {
@@ -700,7 +726,13 @@ fun LoginScreenLandscape(navController: NavController, authViewModel : AuthViewM
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+/**
+ * Main entry point for the Login screen.
+ *
+ * @param navController The navigation controller.
+ * @param authViewModel The AuthViewModel.
+ * @param homeViewModel The HomeViewModel.
+ */
 @Composable
 fun LoginScreen(navController: NavController, authViewModel : AuthViewModel, homeViewModel: HomeViewModel) {
 

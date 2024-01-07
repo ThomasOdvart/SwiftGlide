@@ -66,12 +66,36 @@ import androidx.navigation.compose.rememberNavController
 import com.example.swiftglide.R
 import com.example.swiftglide.navigation.Screen
 import com.example.swiftglide.navigation.data.model.SignupResponse
+import com.example.swiftglide.navigation.data.model.User
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
+/**
+ * Function to add a user to the database and navigate back to the previous screen.
+ *
+ * @param navController The navigation controller for managing navigation.
+ * @param user The user to be added to the database.
+ * @param homeViewModel The ViewModel for home-related functionality.
+ */
+private fun addUserInDB(
+    navController: NavController,
+    user: User,
+    homeViewModel: HomeViewModel
+) {
+    homeViewModel.addUser(user)
+}
+
+/**
+ * Composable function representing the vertical layout of the signup screen.
+ *
+ * @param navController The navigation controller for navigating between screens.
+ * @param authViewModel The ViewModel for authentication-related functionality.
+ * @param homeViewModel The ViewModel for home-related functionality.
+ */
 @Composable
-fun SignupScreenVertical(navController: NavController, authViewModel: AuthViewModel) {
+fun SignupScreenVertical(navController: NavController, authViewModel: AuthViewModel, homeViewModel: HomeViewModel) {
+    // MutableState variables for user input fields and error messages
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
@@ -86,6 +110,7 @@ fun SignupScreenVertical(navController: NavController, authViewModel: AuthViewMo
     var loginFailed by remember { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
 
+    // UI layout using Jetpack Compose
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
@@ -99,16 +124,19 @@ fun SignupScreenVertical(navController: NavController, authViewModel: AuthViewMo
                 )
             )
     ) {
+        // Vertical spacing
         Spacer(modifier = Modifier.height(75.dp))
 
+        // Logo
         Logo()
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        //Email input
+        // Email input
         Row(
             modifier = Modifier.wrapContentSize(),
         ) {
+            // Email icon box
             Box(
                 modifier = Modifier
                     .size(width = 40.dp, height = 50.dp)
@@ -128,6 +156,7 @@ fun SignupScreenVertical(navController: NavController, authViewModel: AuthViewMo
                 )
             }
 
+            // Email TextField
             val containerColor = Color(22, 57, 73)
             TextField(
                 value = email,
@@ -168,10 +197,11 @@ fun SignupScreenVertical(navController: NavController, authViewModel: AuthViewMo
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        //Password input
+        // Password input
         Row(
             modifier = Modifier.wrapContentSize(),
         ) {
+            // Password icon box
             Box(
                 modifier = Modifier
                     .size(width = 40.dp, height = 50.dp)
@@ -191,12 +221,14 @@ fun SignupScreenVertical(navController: NavController, authViewModel: AuthViewMo
                 )
             }
 
+            // Password TextField
             val containerColor = Color(22, 57, 73)
             TextField(
                 value = password,
                 onValueChange = {
                     password = it
-                    passwordErrorText = "" },
+                    passwordErrorText = ""
+                },
                 label = null,
                 placeholder = {
                     Text(
@@ -233,10 +265,11 @@ fun SignupScreenVertical(navController: NavController, authViewModel: AuthViewMo
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        //Confirm password input
+        // Confirm password input
         Row(
             modifier = Modifier.wrapContentSize(),
         ) {
+            // Confirm password icon box
             Box(
                 modifier = Modifier
                     .size(width = 40.dp, height = 50.dp)
@@ -256,12 +289,14 @@ fun SignupScreenVertical(navController: NavController, authViewModel: AuthViewMo
                 )
             }
 
+            // Confirm password TextField
             val containerColor = Color(22, 57, 73)
             TextField(
                 value = confirmPassword,
                 onValueChange = {
                     confirmPassword = it
-                    confirmPasswordErrorText = "" },
+                    confirmPasswordErrorText = ""
+                },
                 label = null,
                 placeholder = {
                     Text(
@@ -299,11 +334,11 @@ fun SignupScreenVertical(navController: NavController, authViewModel: AuthViewMo
 
         Spacer(modifier = Modifier.height(20.dp))
 
-
         // Organization name input
         Row(
             modifier = Modifier.wrapContentSize(),
         ) {
+            // Organization name icon box
             Box(
                 modifier = Modifier
                     .size(width = 40.dp, height = 50.dp)
@@ -323,12 +358,14 @@ fun SignupScreenVertical(navController: NavController, authViewModel: AuthViewMo
                 )
             }
 
+            // Organization name TextField
             val containerColor = Color(22, 57, 73)
             TextField(
                 value = organizationName,
                 onValueChange = {
                     organizationName = it
-                    organizationNameErrorText = "" },
+                    organizationNameErrorText = ""
+                },
                 label = null,
                 placeholder = {
                     Text(
@@ -364,6 +401,7 @@ fun SignupScreenVertical(navController: NavController, authViewModel: AuthViewMo
             Text(text = organizationNameErrorText, color = Color.Red)
         }
 
+        // Display error message if signup fails
         if (loginFailed) {
             Spacer(modifier = Modifier.height(10.dp))
             Text(text = errorMessage, color = Color.Red)
@@ -371,8 +409,10 @@ fun SignupScreenVertical(navController: NavController, authViewModel: AuthViewMo
 
         Spacer(modifier = Modifier.height(20.dp))
 
+        // Signup button with validation and signup logic
         Button(
             onClick = {
+                // Email validation checks
                 if (email.isEmpty()) {
                     emailErrorText = "Email must not be empty"
                 } else if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
@@ -383,6 +423,7 @@ fun SignupScreenVertical(navController: NavController, authViewModel: AuthViewMo
                     emailErrorText = "Invalid domain"
                 }
 
+                // Password validation checks
                 if (password.isEmpty()) {
                     passwordErrorText = "Password must not be empty"
                 } else if (confirmPassword.isEmpty()) {
@@ -393,22 +434,30 @@ fun SignupScreenVertical(navController: NavController, authViewModel: AuthViewMo
                     }
                 }
 
+                // Organization name validation check
                 if (organizationName.isEmpty()) {
                     organizationNameErrorText = "Organization name must not be empty"
                 }
 
-                if (emailErrorText.isEmpty() && passwordErrorText.isEmpty() && confirmPasswordErrorText.isEmpty() && organizationNameErrorText.isEmpty()) {
-
+                // If no validation errors, proceed with signup
+                if (emailErrorText.isEmpty() && passwordErrorText.isEmpty() &&
+                    confirmPasswordErrorText.isEmpty() && organizationNameErrorText.isEmpty()
+                ) {
                     coroutineScope.launch {
                         authViewModel.signup(email, password, organizationName)
-                        Log.d("lauch", "authviewmodel called")
 
+                        // Delay to wait for the signup response
                         delay(2000)
 
                         authViewModel.signupResponse.collect { signupResponse ->
-                            Log.d("response", "Signupscreen: $signupResponse")
                             if (signupResponse.message.isNotEmpty()) {
-                                if(signupResponse.validated) {
+                                if (signupResponse.validated) {
+                                    // Create a User object and add it to the database
+                                    val user = User(email, "Manager")
+
+                                    addUserInDB(navController, user, homeViewModel)
+                                    delay(1000)
+                                    // Navigate to the home screen
                                     navController.navigate(Screen.HomeScreen.route)
                                 } else {
                                     errorMessage = signupResponse.message
@@ -416,25 +465,7 @@ fun SignupScreenVertical(navController: NavController, authViewModel: AuthViewMo
                                 }
                             }
                         }
-
                     }
-                    /*
-                    coroutineScope.launch {
-                        authViewModel.signup(email, password, organizationName)
-
-
-                        authViewModel.signupResponse.collectLatest { signupResponse ->
-                            Log.d("response", "Signupscreen: $signupResponse")
-                            if (signupResponse.message.isNotEmpty()) {
-                                if(signupResponse.validated) {
-                                    navController.navigate(Screen.HomeScreen.route)
-                                } else {
-                                    errorMessage = signupResponse.message
-                                    loginFailed = true
-                                }
-                            }
-                        }
-                    }*/
                 }
             },
             modifier = Modifier
@@ -445,7 +476,6 @@ fun SignupScreenVertical(navController: NavController, authViewModel: AuthViewMo
                     shape = RoundedCornerShape(40.dp)
                 ),
             colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
-            /*elevation = ButtonDefaults.elevation(defaultElevation = 0.dp, pressedElevation = 0.dp)*/
         ) {
             Text(
                 text = "SIGNUP",
@@ -456,13 +486,14 @@ fun SignupScreenVertical(navController: NavController, authViewModel: AuthViewMo
 
         Spacer(modifier = Modifier.weight(1f))
 
+        // Switch to login screen text
         SignupSwitchToSignupText(navController)
 
         Spacer(modifier = Modifier.height(10.dp))
     }
 }
 @Composable
-fun SignupScreenLandscape(navController: NavController, authViewModel: AuthViewModel) {
+fun SignupScreenLandscape(navController: NavController, authViewModel: AuthViewModel, homeViewModel: HomeViewModel) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
@@ -815,6 +846,10 @@ fun SignupScreenLandscape(navController: NavController, authViewModel: AuthViewM
                             Log.d("response", "Signupscreen: $signupResponse")
                             if (signupResponse.message.isNotEmpty()) {
                                 if(signupResponse.validated) {
+                                    val user = User(email, "Manager")
+
+                                    addUserInDB(navController, user, homeViewModel)
+                                    delay(1000)
                                     navController.navigate(Screen.HomeScreen.route)
                                 } else {
                                     errorMessage = signupResponse.message
@@ -870,7 +905,7 @@ fun SignupScreenLandscape(navController: NavController, authViewModel: AuthViewM
 
 
 @Composable
-fun SignupScreen(navController: NavController, authViewModel: AuthViewModel) {
+fun SignupScreen(navController: NavController, authViewModel: AuthViewModel, homeViewModel: HomeViewModel) {
 
     var isLandscape by remember { mutableStateOf(false) }
 
@@ -888,12 +923,14 @@ fun SignupScreen(navController: NavController, authViewModel: AuthViewModel) {
     if (isLandscape) {
         SignupScreenLandscape(
             navController = navController,
-            authViewModel = authViewModel
+            authViewModel = authViewModel,
+            homeViewModel = homeViewModel
         )
     } else {
         SignupScreenVertical(
             navController = navController,
-            authViewModel = authViewModel
+            authViewModel = authViewModel,
+            homeViewModel = homeViewModel
         )
     }
 }

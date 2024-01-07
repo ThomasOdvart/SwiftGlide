@@ -6,5 +6,5 @@ import com.google.gson.annotations.SerializedName
 data class SignupResponse (
 
     val validated: Boolean,
-    val message: String,
+    val message: String
 )

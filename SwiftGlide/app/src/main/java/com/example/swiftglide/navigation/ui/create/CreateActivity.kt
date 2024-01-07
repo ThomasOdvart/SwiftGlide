@@ -64,11 +64,11 @@ import com.example.swiftglide.navigation.data.model.ListTeam
 import com.example.swiftglide.navigation.data.model.Team
 import com.example.swiftglide.navigation.data.model.User
 import com.example.swiftglide.navigation.ui.auth.HomeViewModel
-import com.example.swiftglide.navigation.ui.auth.addUserInDB
 import com.example.swiftglide.navigation.ui.navbar.Navbar
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlin.math.log
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -94,19 +94,19 @@ fun CreateScreen(navController: NavController, createViewModel: CreateViewModel,
 
     homeViewModel.getAllUsers()
     val userList: List<User> by homeViewModel.userList.observeAsState(initial = listOf())
-    val userEmail: String? = userList.firstOrNull()?.email
     LaunchedEffect(Unit) {
         coroutineScope {
             launch {
 
-                if (userEmail != null) {
-                    //createViewModel.getTeamsByOrganization(userEmail)
-                    createViewModel.getTeamsByOrganization("thomas.odvart@gmail.com")
+                while(userList.isEmpty()) {
+                    delay(500)
                 }
+                //createViewModel.getTeamsByOrganization(userEmail)
+                createViewModel.getTeamsByOrganization(userList[0].email)
+
                 delay(2000)
                 createViewModel.getTeamsResponse.collect { teams ->
                     Teams = teams // Update the state with the received teams
-                    Log.d("teams", "CreateScreen: $teams")
                 }
             }
         }
@@ -152,7 +152,6 @@ fun CreateScreen(navController: NavController, createViewModel: CreateViewModel,
                           coroutineScope.launch {
                               delay(2000)
                               createViewModel.createTeamResponse.collect { createTeamResponse ->
-                                  Log.d("response", "Signupscreen: $createTeamResponse")
                                   if(createTeamResponse.isCreated) {
                                       //
                                       isErrorInTeamCreation = false
@@ -173,14 +172,15 @@ fun CreateScreen(navController: NavController, createViewModel: CreateViewModel,
 
 
                           coroutineScope.launch {
-                              if (userEmail != null) {
-                                  //createViewModel.getTeamsByOrganization(userEmail)
-                                  createViewModel.getTeamsByOrganization("thomas.odvart@gmail.com")
+                              while(userList.isEmpty()) {
+                                  delay(500)
                               }
+                              //createViewModel.getTeamsByOrganization(userEmail)
+                              createViewModel.getTeamsByOrganization(userList[0].email)
                               delay(2000)
                               createViewModel.getTeamsResponse.collect { teams ->
                                   Teams = teams // Update the state with the received teams
-                                  Log.d("teams", "CreateScreen: $teams")
+
                               }
                           }
 
@@ -190,8 +190,12 @@ fun CreateScreen(navController: NavController, createViewModel: CreateViewModel,
             )
 
             Spacer(modifier = Modifier.weight(1f))
+            var role = "Player"
+            if (userList.isNotEmpty()) {
+                role = userList[0].role
+            }
 
-            Navbar(navController, "Add", "Manager")
+            Navbar(navController, "Add", role)
 
         }
 
@@ -236,7 +240,13 @@ fun CreateScreen(navController: NavController, createViewModel: CreateViewModel,
                     ) {
                         TeamList(Teams, navController)
                     }
-                    Navbar(navController, "Add", "Manager")
+
+                    var role = "Player"
+                    if (userList.isNotEmpty()) {
+                        role = userList[0].role
+                    }
+
+                    Navbar(navController, "Add", role)
 
                 }
             },

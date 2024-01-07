@@ -30,10 +30,9 @@ import com.example.swiftglide.navigation.ui.navbar.Navbar
 fun HomeScreen(navController: NavController, homeViewModel : HomeViewModel) {
 
     homeViewModel.getAllUsers()
-    Log.d("lauch", "ran getallsuers")
 
     val userList: List<User> by homeViewModel.userList.observeAsState(initial = listOf())
-    Log.d("lauch", "finding user by email ${userList}")
+    Log.d("Homescreen", "HomeScreen: ${userList}")
     Column (
         modifier = Modifier
             .fillMaxSize()
@@ -51,8 +50,12 @@ fun HomeScreen(navController: NavController, homeViewModel : HomeViewModel) {
 
 
         Spacer(modifier = Modifier.weight(1f))
+        var role = "Player"
+        if (userList.isNotEmpty()) {
+            role = userList[0].role
+        }
 
-        Navbar(navController, "Home", "Manager")
+        Navbar(navController, "Home", role)
     }
 }
 

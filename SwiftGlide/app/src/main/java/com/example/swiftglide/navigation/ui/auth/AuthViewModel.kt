@@ -19,11 +19,22 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
+/**
+ * ViewModel for authentication-related operations.
+ *
+ * @param authRepository The repository responsible for handling authentication operations.
+ */
 class AuthViewModel(private val authRepository: AuthRepository) : ViewModel() {
 
     private val _loginResponse = MutableStateFlow(LoginResponse(validated = false, message = "", role = ""))
     val loginResponse: StateFlow<LoginResponse> = _loginResponse
 
+    /**
+     * Performs login with the provided [email] and [password].
+     *
+     * @param email The user's email address.
+     * @param password The user's password.
+     */
     fun login(email: String, password: String) {
         viewModelScope.launch {
             var result = authRepository.login(email, password)
@@ -36,6 +47,13 @@ class AuthViewModel(private val authRepository: AuthRepository) : ViewModel() {
     private val _signupResponse = MutableStateFlow(SignupResponse(false, ""))
     val signupResponse: StateFlow<SignupResponse> = _signupResponse
 
+    /**
+     * Performs user signup with the provided [email], [password], and [organization].
+     *
+     * @param email The user's email address.
+     * @param password The user's password.
+     * @param organization The organization associated with the user.
+     */
     fun signup(email: String, password: String, organization: String) {
         viewModelScope.launch {
             val response = authRepository.signup(email, password, organization)
@@ -45,6 +63,11 @@ class AuthViewModel(private val authRepository: AuthRepository) : ViewModel() {
     }
 
     companion object {
+        /**
+         * Creates a [ViewModelProvider.Factory] for [AuthViewModel].
+         *
+         * @return The created [ViewModelProvider.Factory].
+         */
         fun createFactory(): ViewModelProvider.Factory {
             return object : ViewModelProvider.Factory {
                 override fun <T : ViewModel> create(modelClass: Class<T>): T {
