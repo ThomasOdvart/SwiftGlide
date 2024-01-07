@@ -5,8 +5,8 @@ import kotlinx.android.parcel.Parcelize
 import kotlinx.android.parcel.RawValue
 
 @Parcelize
-data class Team (
+data class ListTeam (
     val id: Int,
     val name: String,
-    val playerList: @RawValue List<Player>,
+    val amountOfPlayers: Int,
 ) : Parcelable

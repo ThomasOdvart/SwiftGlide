@@ -34,8 +34,10 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -58,28 +60,57 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.swiftglide.R
 import com.example.swiftglide.navigation.Screen
+import com.example.swiftglide.navigation.data.model.ListTeam
 import com.example.swiftglide.navigation.data.model.Team
+import com.example.swiftglide.navigation.data.model.User
+import com.example.swiftglide.navigation.ui.auth.HomeViewModel
+import com.example.swiftglide.navigation.ui.auth.addUserInDB
 import com.example.swiftglide.navigation.ui.navbar.Navbar
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CreateScreen(navController: NavController, createViewModel: CreateViewModel) {
+fun CreateScreen(navController: NavController, createViewModel: CreateViewModel, homeViewModel: HomeViewModel) {
+    var Teams by remember { mutableStateOf<List<ListTeam>>(emptyList()) }
+
     var wantsToCreateTeam by remember { mutableStateOf(false) }
 
     var isTeamNameEmpty by remember { mutableStateOf(false) }
+    var isErrorInTeamCreation by remember { mutableStateOf(false) }
+    var errorMessage by remember { mutableStateOf("") }
 
     var isBottomSheetVisible by remember { mutableStateOf(false) }
     var teamName by remember { mutableStateOf("") }
 
     var fakeTeams by remember {
         mutableStateOf(mutableStateListOf(
-        Team(2, "Team 1", 20),
+        ListTeam(2, "Team 1", 20),
         ))
     }
 
     val coroutineScope = rememberCoroutineScope()
+
+    homeViewModel.getAllUsers()
+    val userList: List<User> by homeViewModel.userList.observeAsState(initial = listOf())
+    val userEmail: String? = userList.firstOrNull()?.email
+    LaunchedEffect(Unit) {
+        coroutineScope {
+            launch {
+
+                if (userEmail != null) {
+                    //createViewModel.getTeamsByOrganization(userEmail)
+                    createViewModel.getTeamsByOrganization("thomas.odvart@gmail.com")
+                }
+                delay(2000)
+                createViewModel.getTeamsResponse.collect { teams ->
+                    Teams = teams // Update the state with the received teams
+                    Log.d("teams", "CreateScreen: $teams")
+                }
+            }
+        }
+    }
 
     if (wantsToCreateTeam) {
 
@@ -116,15 +147,22 @@ fun CreateScreen(navController: NavController, createViewModel: CreateViewModel)
                           isTeamNameEmpty = true
                       } else {
                           //create team
+                          createViewModel.createTeam(teamName, "thomas.odvart@gmail.com")
 
                           coroutineScope.launch {
-                              createViewModel.createTeam(teamName, 0, "thomas.odvart@gmail.com")
-                              Log.d("lauch", "CreateViewModle called")
-
                               delay(2000)
-
                               createViewModel.createTeamResponse.collect { createTeamResponse ->
                                   Log.d("response", "Signupscreen: $createTeamResponse")
+                                  if(createTeamResponse.isCreated) {
+                                      //
+                                      isErrorInTeamCreation = false
+                                      errorMessage = createTeamResponse.message
+                                  } else {
+                                      //display error
+                                      isErrorInTeamCreation = true
+                                      errorMessage = createTeamResponse.message
+                                  }
+
                               }
 
                           }
@@ -132,6 +170,20 @@ fun CreateScreen(navController: NavController, createViewModel: CreateViewModel)
                           // Reset variables or perform any other necessary actions
                           teamName = ""
                           wantsToCreateTeam = false
+
+
+                          coroutineScope.launch {
+                              if (userEmail != null) {
+                                  //createViewModel.getTeamsByOrganization(userEmail)
+                                  createViewModel.getTeamsByOrganization("thomas.odvart@gmail.com")
+                              }
+                              delay(2000)
+                              createViewModel.getTeamsResponse.collect { teams ->
+                                  Teams = teams // Update the state with the received teams
+                                  Log.d("teams", "CreateScreen: $teams")
+                              }
+                          }
+
                       }
                 },
                 onCancelClick = { wantsToCreateTeam = false }
@@ -172,12 +224,17 @@ fun CreateScreen(navController: NavController, createViewModel: CreateViewModel)
                     }
                     Spacer(modifier = Modifier.height(20.dp))
 
+                    if (isErrorInTeamCreation) {
+                        Text(text = errorMessage, color = Color.Red)
+                        Spacer(modifier = Modifier.height(20.dp))
+                    }
+
                     Column(
                         modifier = Modifier
                             .weight(1f)
                             .padding(10.dp, 0.dp)
                     ) {
-                        TeamList(fakeTeams, navController)
+                        TeamList(Teams, navController)
                     }
                     Navbar(navController, "Add", "Manager")
 
@@ -187,6 +244,7 @@ fun CreateScreen(navController: NavController, createViewModel: CreateViewModel)
                 FloatingActionButton(
                     onClick = {
                         // Handle the click event
+                        isErrorInTeamCreation = false
                         wantsToCreateTeam = true
                     },
                     modifier = Modifier
@@ -314,7 +372,7 @@ private fun TeamNameButtons(onTeamCreationClick: () -> Unit, onCancelClick: () -
 }
 
 @Composable
-private fun TeamList(teams: List<Team>, navController: NavController) {
+private fun TeamList(teams: List<ListTeam>, navController: NavController) {
     Box {
         LazyColumn(
 
@@ -328,7 +386,7 @@ private fun TeamList(teams: List<Team>, navController: NavController) {
 }
 
 @Composable
-private fun TeamListItem(team: Team, navController: NavController) {
+private fun TeamListItem(team: ListTeam, navController: NavController) {
     Row(
        modifier = Modifier
            .fillMaxWidth()

@@ -21,7 +21,7 @@ import com.example.swiftglide.navigation.ui.schedule.ScheduleScreen
 @Composable
 fun Navigation(authViewModel: AuthViewModel, createViewModel: CreateViewModel, homeViewModel: HomeViewModel) {
     val navController = rememberNavController()
-    NavHost(navController = navController, startDestination = Screen.LoginScreen.route) {
+    NavHost(navController = navController, startDestination = Screen.HomeScreen.route) {
         composable(route = Screen.LoginScreen.route) {
             LoginScreen(navController = navController, authViewModel = authViewModel, homeViewModel)
         }
@@ -38,7 +38,7 @@ fun Navigation(authViewModel: AuthViewModel, createViewModel: CreateViewModel, h
             SignupScreen(navController = navController, authViewModel = authViewModel)
         }
         composable(route = Screen.CreateScreen.route) {
-            CreateScreen(navController = navController, createViewModel=createViewModel)
+            CreateScreen(navController = navController, createViewModel=createViewModel, homeViewModel=homeViewModel)
         }
         composable(
             route = Screen.TeamDetailScreen.route + "/{teamId}",
@@ -52,7 +52,7 @@ fun Navigation(authViewModel: AuthViewModel, createViewModel: CreateViewModel, h
 
             // Pass the teamId to your TeamDetailScreen
             teamId?.let {
-                TeamDetailScreen(teamId)
+                TeamDetailScreen(teamId, createViewModel)
             } ?: run {
                 // Handle the case when teamId is null
             }

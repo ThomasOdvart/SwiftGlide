@@ -2,6 +2,7 @@ package com.example.swiftglide.navigation.ui.auth
 
 import android.content.Context
 import android.content.Intent
+import android.content.res.Configuration
 import android.os.Bundle
 import android.util.Log
 import android.util.Patterns
@@ -34,6 +35,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.swiftglide.navigation.ui.theme.SwiftGlideTheme
 import android.view.View
+import androidx.activity.ComponentActivity
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -41,13 +44,16 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -63,9 +69,101 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 
+
+@Composable
+fun ForgotPasswordText() {
+    Row(
+
+    ) {
+        Text(
+            text = "Forgot ",
+            modifier = Modifier
+                .padding(top = 5.dp),
+            fontSize = 15.sp,
+            fontWeight = FontWeight.Bold,
+            textAlign = TextAlign.Center,
+            color = Color.White,
+        )
+        Text(
+            text = "username ",
+            modifier = Modifier
+                .padding(top = 5.dp),
+            fontSize = 15.sp,
+            fontWeight = FontWeight.Bold,
+            textAlign = TextAlign.Center,
+            color = Color(0xFF54BE70),
+        )
+        Text(
+            text = "or ",
+            modifier = Modifier
+                .padding(top = 5.dp),
+            fontSize = 15.sp,
+            fontWeight = FontWeight.Bold,
+            textAlign = TextAlign.Center,
+            color = Color.White,
+        )
+        Text(
+            text = "password?",
+            modifier = Modifier
+                .padding(top = 5.dp),
+            fontSize = 15.sp,
+            fontWeight = FontWeight.Bold,
+            textAlign = TextAlign.Center,
+            color = Color(0xFF54BE70),
+        )
+    }
+}
+
+@Composable
+fun SwitchToSignupText(navController: NavController) {
+    Row(
+        modifier = Modifier
+            .clickable {
+                navController.navigate(Screen.SignupScreen.route)
+            }
+    ) {
+        Text(
+            text = "Want to start an ",
+            modifier = Modifier
+                .padding(top = 5.dp),
+            fontSize = 18.sp,
+            fontWeight = FontWeight.Bold,
+            textAlign = TextAlign.Center,
+            color = Color.White,
+        )
+        Text(
+            text = "organization?",
+            modifier = Modifier
+                .padding(top = 5.dp),
+            fontSize = 18.sp,
+            fontWeight = FontWeight.Bold,
+            textAlign = TextAlign.Center,
+            color = Color(0xFF54BE70),
+        )
+    }
+}
+fun addUserInDB(
+    navController: NavController,
+    user: User,
+    homeViewModel: HomeViewModel
+) {
+    homeViewModel.addUser(user)
+    navController.popBackStack()
+}
+
+@Composable
+fun Logo() {
+    Image(
+        painter = painterResource(id = R.drawable.full_logo),
+        contentDescription = null,
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(219.dp)
+    )
+}
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LoginScreen(navController: NavController, authViewModel : AuthViewModel, homeViewModel: HomeViewModel) {
+fun LoginScreenVertical(navController: NavController, authViewModel : AuthViewModel, homeViewModel: HomeViewModel) {
 
     var email by remember { mutableStateOf("") }
     var isEmailEmpty by remember { mutableStateOf(false) }
@@ -312,17 +410,327 @@ fun LoginScreen(navController: NavController, authViewModel : AuthViewModel, hom
 
         Spacer(modifier = Modifier.height(10.dp))
     }
+
 }
 
+
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun Logo() {
-    Image(
-        painter = painterResource(id = R.drawable.full_logo),
-        contentDescription = null,
+fun LoginScreenLandscape(navController: NavController, authViewModel : AuthViewModel, homeViewModel: HomeViewModel) {
+
+    var email by remember { mutableStateOf("") }
+    var isEmailEmpty by remember { mutableStateOf(false) }
+    var isEmailWrongFormat by remember { mutableStateOf(false) }
+    var isEmailTooLong by remember { mutableStateOf(false) }
+    var hasEmailInvalidDomain by remember { mutableStateOf(false) }
+
+    var password by remember { mutableStateOf("") }
+    var isPasswordEmpty by remember { mutableStateOf(false) }
+
+    var errorMessage by remember { mutableStateOf("") }
+    var loginFailed by remember { mutableStateOf(false) }
+
+    var loginresponse by remember { mutableStateOf(LoginResponse(false, "", "")) }
+
+    val coroutineScope = rememberCoroutineScope()
+
+    val isLandscape = LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE
+
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
-            .fillMaxWidth()
-            .height(219.dp)
-    )
+            .fillMaxSize()
+            .background(
+                Brush.linearGradient(
+                    0.0f to Color(0xFF476370),
+                    500.0f to Color(0xFF163949),
+                    start = Offset.Zero,
+                    end = Offset.Infinite
+                )
+            )
+            .padding(horizontal = if (isLandscape) 16.dp else 0.dp) // Adjust padding for landscape
+    ) {
+        Spacer(modifier = Modifier.height(75.dp))
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+        ) {
+            Box(modifier = Modifier
+                .weight(0.5f)
+            ) {
+                Image(
+                    painter = painterResource(id = R.drawable.full_logo),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(219.dp)
+                )
+            }
+
+            Box(
+                modifier = Modifier.weight(1f),
+            ) {
+
+                Column() {
+                    Row(
+                        modifier = Modifier
+                            .wrapContentSize()
+                    ) {
+
+                        Box(
+                            modifier = Modifier
+                                .size(width = 40.dp, height = 50.dp)
+                                .border(
+                                    1.dp,
+                                    color = Color.White,
+                                    shape = RoundedCornerShape(
+                                        topStart = 10.dp,
+                                        bottomStart = 10.dp
+                                    )
+                                )
+                                .clip(RoundedCornerShape(topStart = 10.dp, bottomStart = 10.dp))
+                                .background(Color(22, 57, 73)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Image(
+                                painter = painterResource(id = R.drawable.icon_avatar),
+                                contentDescription = null,
+                                modifier = Modifier.size(20.dp)
+                            )
+                        }
+
+                        TextField(
+                            value = email,
+                            onValueChange = {
+                                email = it
+                                isEmailWrongFormat = false
+                                isEmailEmpty = false
+                                isEmailTooLong = false
+                                hasEmailInvalidDomain = false
+                                loginFailed = false
+                            },
+                            label = null,
+                            placeholder = {
+                                Text(
+                                    text = "Email",
+                                    fontSize = 15.sp,
+                                    color = Color.White,
+                                )
+                            },
+                            colors = TextFieldDefaults.textFieldColors(
+                                containerColor = Color(22, 57, 73),
+                                focusedIndicatorColor = Color.Transparent,
+                                unfocusedIndicatorColor = Color.Transparent,
+                                cursorColor = Color.White
+                            ),
+                            textStyle = TextStyle(color = Color.White, fontSize = 16.sp),
+                            modifier = Modifier
+                                .height(50.dp)
+                                .border(
+                                    1.dp,
+                                    color = Color.White,
+                                    shape = RoundedCornerShape(topEnd = 10.dp, bottomEnd = 10.dp)
+                                ),
+                            shape = RoundedCornerShape(topEnd = 10.dp, bottomEnd = 10.dp)
+                        )
+                    }
+
+                    if (isEmailEmpty) {
+                        Text(text = "Email must not be empty", color = Color.Red)
+                    }
+                    if (isEmailWrongFormat) {
+                        Text(text = "Format must be user@example.com", color = Color.Red)
+                    }
+                    if (isEmailTooLong) {
+                        Text(text = "Email is too long", color = Color.Red)
+                    }
+                    if (hasEmailInvalidDomain) {
+                        Text(text = "Invalid domain", color = Color.Red)
+                    }
+
+                    Spacer(modifier = Modifier.height(5.dp))
+
+                    Row(
+                        modifier = Modifier.wrapContentSize(),
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(width = 40.dp, height = 50.dp)
+                                .border(
+                                    1.dp,
+                                    color = Color.White,
+                                    shape = RoundedCornerShape(
+                                        topStart = 10.dp,
+                                        bottomStart = 10.dp
+                                    )
+                                )
+                                .clip(RoundedCornerShape(topStart = 10.dp, bottomStart = 10.dp))
+                                .background(Color(22, 57, 73)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Image(
+                                painter = painterResource(id = R.drawable.icon_lock),
+                                contentDescription = null,
+                                modifier = Modifier.size(20.dp)
+                            )
+                        }
+
+                        TextField(
+                            value = password,
+                            onValueChange = {
+                                password = it
+                                isPasswordEmpty = false
+                                loginFailed = false
+                            },
+                            label = null,
+                            placeholder = {
+                                Text(
+                                    text = "Password",
+                                    color = Color.White,
+                                    fontSize = 15.sp,
+                                    textAlign = TextAlign.Center,
+                                )
+                            },
+                            colors = TextFieldDefaults.textFieldColors(
+                                containerColor = Color(22, 57, 73),
+                                focusedIndicatorColor = Color.Transparent,
+                                unfocusedIndicatorColor = Color.Transparent,
+                                cursorColor = Color.White
+                            ),
+                            textStyle = TextStyle(color = Color.White, fontSize = 16.sp),
+                            modifier = Modifier
+                                .height(50.dp)
+                                .border(
+                                    1.dp,
+                                    color = Color.White,
+                                    shape = RoundedCornerShape(topEnd = 10.dp, bottomEnd = 10.dp)
+                                )
+                                .padding(0.dp),
+                            shape = RoundedCornerShape(topEnd = 10.dp, bottomEnd = 10.dp)
+                        )
+                    }
+
+                    if (isPasswordEmpty) {
+                        Text(text = "Password must not be empty", color = Color.Red)
+                    }
+
+                    if (loginFailed) {
+                        Spacer(modifier = Modifier.height(10.dp))
+                        Text(text = errorMessage, color = Color.Red)
+                    }
+
+                    Spacer(modifier = Modifier.height(5.dp))
+
+                    Row(
+                        modifier = Modifier
+                            .wrapContentSize(),
+                    ) {
+                        Button(
+                            onClick = {
+                                if (email.isNullOrEmpty()) {
+                                    isEmailEmpty = true
+                                } else if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+                                    isEmailWrongFormat = true
+                                } else if (email.length < 5 || email.length > 50) {
+                                    isEmailTooLong = true
+                                } else if (email.split(".").last().length !in 2..6) {
+                                    hasEmailInvalidDomain = true
+                                }
+
+                                if (password.isNullOrEmpty()) {
+                                    isPasswordEmpty = true
+                                }
+
+                                if (!isEmailEmpty && !isEmailWrongFormat && !isEmailTooLong && !hasEmailInvalidDomain && !isPasswordEmpty) {
+
+                                    coroutineScope.launch {
+                                        authViewModel.login(email, password)
+
+                                        delay(2000)
+
+                                        authViewModel.loginResponse.collect { loginResponse ->
+
+                                            if (loginResponse.validated) {
+
+                                                val user = User(email, loginResponse.role)
+
+                                                addUserInDB(navController, user, homeViewModel)
+                                                Log.d("database", "LoginScreen: added user to db")
+                                                navController.navigate(Screen.HomeScreen.route)
+                                            } else {
+                                                errorMessage = loginResponse.message
+                                                loginFailed = true
+                                            }
+
+                                        }
+                                    }
+                                }
+                            },
+                            modifier = Modifier
+                                .width(275.dp)
+                                .height(50.dp)
+                                .background(
+                                    color = Color(84, 190, 112),
+                                    shape = RoundedCornerShape(40.dp)
+                                ),
+                            colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
+                        ) {
+                            Text(
+                                text = "LOGIN",
+                                color = Color.White,
+                                fontSize = 16.sp
+                            )
+                        }
+                    }
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(5.dp))
+
+        ForgotPasswordText()
+
+        Spacer(modifier = Modifier.weight(1f))
+
+        SwitchToSignupText(navController)
+
+        Spacer(modifier = Modifier.height(10.dp))
+
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun LoginScreen(navController: NavController, authViewModel : AuthViewModel, homeViewModel: HomeViewModel) {
+
+    var isLandscape by remember { mutableStateOf(false) }
+    
+    // Observe the current configuration
+    val configuration = LocalConfiguration.current
+    val newIsLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
+
+    if (isLandscape != newIsLandscape) {
+        // Orientation changed, do something here if needed
+        // You may want to update UI or take specific actions
+        isLandscape = newIsLandscape
+    }
+
+    // Call the appropriate UI function based on the orientation
+    if (isLandscape) {
+        LoginScreenLandscape(
+            navController = navController,
+            authViewModel = authViewModel,
+            homeViewModel = homeViewModel
+        )
+    } else {
+        LoginScreenVertical(
+            navController = navController,
+            authViewModel = authViewModel,
+            homeViewModel = homeViewModel
+        )
+    }
+
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -476,89 +884,6 @@ fun LoginButton(navController: NavController) {
             fontSize = 16.sp
         )
     }
-}
-
-@Composable
-fun ForgotPasswordText() {
-    Row(
-
-    ) {
-        Text(
-            text = "Forgot ",
-            modifier = Modifier
-                .padding(top = 5.dp),
-            fontSize = 15.sp,
-            fontWeight = FontWeight.Bold,
-            textAlign = TextAlign.Center,
-            color = Color.White,
-        )
-        Text(
-            text = "username ",
-            modifier = Modifier
-                .padding(top = 5.dp),
-            fontSize = 15.sp,
-            fontWeight = FontWeight.Bold,
-            textAlign = TextAlign.Center,
-            color = Color(0xFF54BE70),
-        )
-        Text(
-            text = "or ",
-            modifier = Modifier
-                .padding(top = 5.dp),
-            fontSize = 15.sp,
-            fontWeight = FontWeight.Bold,
-            textAlign = TextAlign.Center,
-            color = Color.White,
-        )
-        Text(
-            text = "password?",
-            modifier = Modifier
-                .padding(top = 5.dp),
-            fontSize = 15.sp,
-            fontWeight = FontWeight.Bold,
-            textAlign = TextAlign.Center,
-            color = Color(0xFF54BE70),
-        )
-    }
-}
-
-@Composable
-fun SwitchToSignupText(navController: NavController) {
-    Row(
-        modifier = Modifier
-            .clickable {
-                navController.navigate(Screen.SignupScreen.route)
-            }
-    ) {
-        Text(
-            text = "Want to start an ",
-            modifier = Modifier
-                .padding(top = 5.dp),
-            fontSize = 18.sp,
-            fontWeight = FontWeight.Bold,
-            textAlign = TextAlign.Center,
-            color = Color.White,
-        )
-        Text(
-            text = "organization?",
-            modifier = Modifier
-                .padding(top = 5.dp),
-            fontSize = 18.sp,
-            fontWeight = FontWeight.Bold,
-            textAlign = TextAlign.Center,
-            color = Color(0xFF54BE70),
-        )
-    }
-}
-
-
-fun addUserInDB(
-    navController: NavController,
-    user: User,
-    homeViewModel: HomeViewModel
-) {
-    homeViewModel.addUser(user)
-    navController.popBackStack()
 }
 
 /*@Composable
